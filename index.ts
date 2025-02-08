@@ -34,7 +34,7 @@ app.get("/user", async (req, res) => {
 
   try {
     const user = await User.findOne({ username }); // ❌ No sanitization
-    res.json(user);
+    res.json({ user });
   } catch (error) {
     res.status(500).send("Internal Server Error");
   }

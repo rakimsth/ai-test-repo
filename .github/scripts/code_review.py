@@ -63,14 +63,14 @@ def post_github_comment(pr_number, file_name, feedback):
 def main():
     """Run AI security checks on changed files."""
     changed_files_env = os.getenv("CHANGED_FILES", "[]")
-    
-    # Ensure proper JSON format handling
+    cleaned_files_env = changed_files_env.replace('\\"', '"')
     try:
-        changed_files = json.loads(changed_files_env)
+        changed_files = json.loads(cleaned_files_env)
         if not isinstance(changed_files, list):
             raise ValueError("CHANGED_FILES must be a JSON array.")
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as e:
         print(f"Error parsing CHANGED_FILES: {changed_files_env}")
+        print(f"JSONDecodeError: {e}")
         return
 
     for file in changed_files:
@@ -79,7 +79,6 @@ def main():
             if content:
                 feedback = analyze_code(file, content)
                 post_github_comment(PR_NUMBER, file, feedback)
-
 
 if __name__ == "__main__":
     main()

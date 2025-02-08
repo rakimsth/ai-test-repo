@@ -101,6 +101,11 @@ def main():
             return
 
         for file in changed_files:
+            # Exclude files in .github/scripts folder and files with specific extensions
+            if file.startswith(".github/scripts/"):
+                print(f"Skipping file in .github/scripts: {file}")
+                continue
+                
             if file.endswith((".js", ".ts", ".jsx", ".tsx", ".py", ".sol")):
                 content = fetch_file_content(file)
                 if content:

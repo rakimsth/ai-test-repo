@@ -45,7 +45,7 @@ Provide detailed security recommendations.
 """
     
     response = client.chat.completions.create(
-        model="openai/o3-mini",
+        model="openai/o1-mini",
         messages=[
             {"role": "system", "content": "You are an expert code reviewer and security analyst."},
             {"role": "user", "content": prompt},

@@ -2,7 +2,11 @@ import os
 import json
 import base64
 import requests
+from dotenv import load_dotenv
 from openai import OpenAI
+
+# Load environment variables from .env file
+load_dotenv()
 
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
@@ -15,6 +19,7 @@ client = OpenAI(
     api_key=OPENROUTER_API_KEY,
 )
 
+
 def fetch_file_content(file_path):
     """Fetch file content from GitHub."""
     url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{file_path}"
@@ -24,6 +29,7 @@ def fetch_file_content(file_path):
         if content:
             return base64.b64decode(content).decode("utf-8")
     return None
+
 
 def analyze_code(file_name, code_content):
     """Send code to OpenAI for review and security checks."""
@@ -43,22 +49,25 @@ Check for:
 
 Provide detailed security recommendations.
 """
-    
     response = client.chat.completions.create(
-        model="openai/o1-mini",
+        model="meta-llama/llama-3.3-70b-instruct:free",
         messages=[
-            {"role": "system", "content": "You are an expert code reviewer and security analyst."},
+            {
+                "role": "system",
+                "content": "You are an expert code reviewer and security analyst.",
+            },
             {"role": "user", "content": prompt},
         ],
     )
-    
     return response.choices[0].message.content
+
 
 def post_github_comment(pr_number, file_name, feedback):
     """Post AI security feedback on GitHub PR."""
     url = f"https://api.github.com/repos/{GITHUB_REPO}/issues/{pr_number}/comments"
     comment = {"body": f"### 🛡️ Security Audit for `{file_name}`\n\n{feedback}"}
     requests.post(url, headers=HEADERS, json=comment)
+
 
 def main():
     """Run AI security checks on changed files."""
@@ -79,6 +88,7 @@ def main():
             if content:
                 feedback = analyze_code(file, content)
                 post_github_comment(PR_NUMBER, file, feedback)
+
 
 if __name__ == "__main__":
     main()
